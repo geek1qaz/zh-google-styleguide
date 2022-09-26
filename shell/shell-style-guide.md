@@ -4,8 +4,11 @@
 
 * 版本：2.02
 * 作者：Googlers
-* 翻译：[GitHub@geek1qaz](https://github.com/geek1qaz/) v1.0
-* 项目：[Google Style Guides](https://github.com/google/styleguide)
+* 翻译：[GitHub@geek1qaz](https://github.com/geek1qaz/) v1.0.0
+* 项目：
+  * [Google Style Guides](https://github.com/google/styleguide)
+  * [Google 风格指南 - 中文版](https://github.com/geek1qaz/zh-google-styleguide)
+
 
 ## 背景
 
