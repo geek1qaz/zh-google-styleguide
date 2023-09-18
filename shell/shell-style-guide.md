@@ -4,11 +4,24 @@
 
 * 版本：2.02
 * 作者：Googlers
-* 翻译：[GitHub@geek1qaz](https://github.com/geek1qaz/) v1.0.0
+* 翻译：[GitHub@geek1qaz](https://github.com/geek1qaz/) v1.0.1
 * 项目：
   * [Google Style Guides](https://github.com/google/styleguide)
   * [Google 风格指南 - 中文版](https://github.com/geek1qaz/zh-google-styleguide)
 
+## 目录
+
+| 章节                                              | 内容                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| [背景](#背景)                                     | [使用哪一种 Shell](#使用哪一种-Shell) - [什么时候使用 Shell](#什么时候使用-Shell) |
+| [Shell 文件和解释器调用](#Shell-文件和解释器调用) | [文件扩展名](#文件扩展名) - [SUID/SGID](#SUID/SGID)          |
+| [环境](#环境)                                     | [STDOUT vs STDERR](#STDOUT-vs-STDERR)                        |
+| [注释](#注释)                                     | [文件头](#文件头) - [函数注释](#函数注释) - [实现部分的注释](#实现部分的注释) - [TODO 注释](#TODO-注释) |
+| [格式](#格式)                                     | [缩进](#缩进) - [行的长度和长字符串](#行的长度和长字符串) - [管道](#管道) - [循环](#循环) - [Case 语句](#Case-语句) - [变量扩展](#变量扩展) - [引用](#引用) |
+| [特性和漏洞](#特性和漏洞)                         | [ShellCheck](#ShellCheck) - [命令替换](#命令替换) - [Test, [ ... ] 和 \[[ ... ]\]](#Test,-[ ... ]-和-[[ ... ]]) - [字符串测试](#字符串测试) - [文件名的通配符扩展](#文件名的通配符扩展) - [Eval](#Eval) - [数组](#数组) - [管道导向 while 循环](#管道导向-while-循环) - [算术](#算术) |
+| [命名约定](#命名约定)                             | [函数名](#函数名) - [变量名](#变量名) - [常量和环境变量名](#常量和环境变量名) - [源文件名](#源文件名) - [只读变量](#只读变量) - [使用本地变量](#使用本地变量) - [函数位置](#函数位置) - [主函数 main](#主函数-main) |
+| [调用命令](#调用命令)                             | [检查返回值](#检查返回值) - [内置命令与外部命令](#内置命令与外部命令) |
+| [总结](#总结)                                     |                                                              |
 
 ## 背景
 
@@ -154,7 +167,7 @@ function del_thing() {
 
 对于临时的、短期的解决方案，或者足够好但不够完美的代码，使用 `TODO` 注释。
 
-这与 C++ 指南中的约定相一致。
+这与 [C++ 指南](https://google.github.io/styleguide/cppguide.html#TODO_Comments)中的约定相一致。
 
 `TODO`s 应该包含全大写形式的字符串 `TODO`，后面跟着姓名、电子邮件地址、bug ID 或者个人或问题的其他标识信息，并提供 `TODO` 所引用问题的最佳上下文。冒号是可选的。主要目的是有一个一致的 `TODO`，可以通过搜索来查找如何根据请求获得更多详细信息。`TODO` 不是指被引用的人会解决问题的承诺。因此，当您创建 `TODO` 并标注姓名时，给出的几乎总是您的名字。
 
@@ -206,10 +219,10 @@ long string."
 否则，应该将整个管道操作分割成每行一个管段，管道操作的下一部分应该将管道符放在新行并且缩进 2 个空格。这适用于使用 `|` 组合的命令链，以及使用 `||` 和 `&&` 的逻辑运算链。
 
 ````bash
-# All fits on one line
+# 都在一行
 command1 | command2
 
-# Long commands
+# 长命令
 command1 \
   | command2 \
   | command3 \
@@ -220,13 +233,12 @@ command1 \
 
 请将 `; do`、`; then` 和 `while`、`for`、`if` 放在同一行。
 
-Shell 中的循环略有不同，但是我们遵循跟声明函数时的大括号相同的原则。也就是说，`; do`、`; then` 应该和 if/for/while 放在同一行。`else` 应该单独一行，结束语句应该单独一行并且跟开始语句垂直对齐。
+Shell 中的循环略有不同，但是我们遵循跟声明函数时的大括号相同的原则。也就是说，`; do`、`; then` 应该和 `if/for/while` 放在同一行。`else` 应该单独一行，结束语句应该单独一行并且跟开始语句垂直对齐。
 
 例如：
 
 ```bash
-# If inside a function, consider declaring the loop variable as
-# a local to avoid it leaking into the global environment:
+# 如果在函数内部，请考虑将循环变量声明为局部（local）以避免它泄漏到全局环境中：
 # local dir
 for dir in "${dirs_to_cleanup[@]}"; do
   if [[ -d "${dir}/${ORACLE_SID}" ]]; then
@@ -256,12 +268,12 @@ done
 ````bash
 case "${expression}" in
   a)
-    variable="…"
-    some_command "${variable}" "${other_expr}" …
+    variable="..."
+    some_command "${variable}" "${other_expr}" ...
     ;;
   absolute)
     actions="relative"
-    another_command "${actions}" "${other_expr}" …
+    another_command "${actions}" "${other_expr}" ...
     ;;
   *)
     error "Unexpected expression '${expression}'"
@@ -297,28 +309,28 @@ done
 
 * 与现存代码中您所发现的保持一致。
 
-* 引用变量，请参阅下一小节。
+* 引用变量，请参阅[下一小节](#引用)。
 
 * 除非绝对必要或者为了避免深深的困惑，否则不要用大括号将单个字符的 shell 特殊变量或位置变量括起来。
 
   推荐将其他所有变量用大括号括起来。
 
 ````bash
-# Section of *recommended* cases.
+# 部分 *推荐* 案例
 
-# Preferred style for 'special' variables:
+# “特殊”变量的首选样式：
 echo "Positional: $1" "$5" "$3"
-echo "Specials: !=$!, -=$-, _=$_. ?=$?, #=$# *=$* @=$@ \$=$$ …"
+echo "Specials: !=$!, -=$-, _=$_. ?=$?, #=$# *=$* @=$@ \$=$$ ..."
 
-# Braces necessary:
+# 使用括号的必要性：
 echo "many parameters: ${10}"
 
-# Braces avoiding confusion:
-# Output is "a0b0c0"
+# 使用括号避免混淆：
+# 输出是 “a0b0c0”
 set -- a b c
 echo "${1}0${2}0${3}0"
 
-# Preferred style for other variables:
+# 其他变量的首选样式：
 echo "PATH=${PATH}, PWD=${PWD}, mine=${some_var}"
 while read -r f; do
   echo "file=${f}"
@@ -326,14 +338,12 @@ done < <(find /tmp)
 ````
 
 ````bash
-# Section of *discouraged* cases
+# 部分 *不受鼓励的* 案例
 
-# Unquoted vars, unbraced vars, brace-delimited single letter
-# shell specials.
+# 不带引号的变量，不带大括号的变量，用大括号分隔的单字母 shell 特殊变量
 echo a=$avar "b=$bvar" "PID=${$}" "${1}"
 
-# Confusing use: this is expanded as "${1}0${2}0${3}0",
-# not "${10}${20}${30}
+# 令人费解的使用：这将扩展为 "${1}0${2}0${3}0"，而不是 "${10}${20}${30}"
 set -- a b c
 echo "$10$20$30"
 ````
@@ -343,76 +353,70 @@ echo "$10$20$30"
 ### 引用
 
 * 除非需要谨慎地进行不带引用的扩展或者它是 shell 内部的整数（请参阅下一小节），否则总是引用包含变量、命令替换、空格或 shell 元字符的字符串。
-* 使用数组安全引用元素列表，特别是命令行标识符。请参阅下面的数组。
-* 可选（optionally）引用 shell 内部的、定义为整数的只读特殊变量：`$?`、`$#`、`$$` 、`$!`(man bash)。为了保持一致性，推荐引用“命名的（named）”内部整型变量，例如 PPID 等。
+* 使用数组安全引用元素列表，特别是命令行标识符。请参阅下面的[数组](#数组)。
+* 可选（optionally）引用 shell 内部的、定义为整数的只读特殊变量：`$?`、`$#`、`$$` 、`$!`(man bash)。为了保持一致性，推荐引用“命名的（named）”内置整型变量，例如 PPID 等。
 * 推荐使用引号括起来作为“单词（words）”的字符串（而不是命令选项或路径名称）。
 * 永远不要引用整数字面值（literal integers）。
-* 注意 `[[ ... ]]` 中模式匹配的引用规则。请参阅下面的 Test, `[ ... ]` 和 `[[ ... ]]` 小节。
+* 注意 `[[ ... ]]` 中模式匹配的引用规则。请参阅下面的 [Test, [ ... ] 和 \[[ ... ]\]](#Test,-[ ... ]-和-[[ ... ]]) 小节。
 * 除非您有使用 `$*` 的特殊理由，否则请使用 `"$@"`，例如简单地将参数附加到消息或日志中的字符串。
 
 ``````bash
-# 'Single' quotes indicate that no substitution is desired.
-# "Double" quotes indicate that substitution is required/tolerated.
+# '单' 引号表示不需要替换
+# "双" 引号表示需要/容忍替换
 
-# Simple examples
+# 简单示例
 
-# "quote command substitutions"
-# Note that quotes nested inside "$()" don't need escaping.
+# "引用命令替换"
+# 注意，嵌套在 "$()" 中的引号不需要转义
 flag="$(some_command and its args "$@" 'quoted separately')"
 
-# "quote variables"
+# "引用变量"
 echo "${flag}"
 
-# Use arrays with quoted expansion for lists.
+# 使用带引号展开的数组作为列表
 declare -a FLAGS
 FLAGS=( --foo --bar='baz' )
 readonly FLAGS
 mybinary "${FLAGS[@]}"
 
-# It's ok to not quote internal integer variables.
+# 内置的整型变量不引用也是可以的
 if (( $# > 3 )); then
   echo "ppid=${PPID}"
 fi
 
-# "never quote literal integers"
+# "永远不要引用纯整数"
 value=32
-# "quote command substitutions", even when you expect integers
+# "引用命令替换"，即使你期望的是整数
 number="$(generate_number)"
 
-# "prefer quoting words", not compulsory
+# "推荐引用单词（words）", 不是强制的
 readonly USE_INTEGER='true'
 
-# "quote shell meta characters"
+# "引用 shell 元字符"
+# （元字符指的是能够被 shell 解释的特殊字符）
 echo 'Hello stranger, and well met. Earn lots of $$$'
 echo "Process $$: Done making \$\$\$."
 
-# "command options or path names"
-# ($1 is assumed to contain a value here)
+# "命令选项或路径名称"
+# （这里假设 $1 包含一个值）
 grep -li Hugo /dev/null "$1"
 
-# Less simple examples
-# "quote variables, unless proven false": ccs might be empty
+# 不太简单的例子
+# "引用变量，除非被证明为假"：ccs 可能为空
 git send-email --to "${reviewers}" ${ccs:+"--cc" "${ccs}"}
 
-# Positional parameter precautions: $1 might be unset
-# Single quotes leave regex as-is.
+# 位置参数注意事项：$1 可能未设置（unset）
+# 单引号保持正则表达式不变
 grep -cP '([Ss]pecial|\|?characters*)$' ${1:+"$1"}
 
-# For passing on arguments,
-# "$@" is right almost every time, and
-# $* is wrong almost every time:
+# 对于传递参数，"$@" 几乎每次都是正确的，而 $* 几乎每次都是错误的
 #
-# * $* and $@ will split on spaces, clobbering up arguments
-#   that contain spaces and dropping empty strings;
-# * "$@" will retain arguments as-is, so no args
-#   provided will result in no args being passed on;
-#   This is in most cases what you want to use for passing
-#   on arguments.
-# * "$*" expands to one argument, with all args joined
-#   by (usually) spaces,
-#   so no args provided will result in one empty string
-#   being passed on.
-# (Consult `man bash` for the nit-grits ;-)
+# * $* 和 $@ 将在空格上拆分，删除包含空格的参数并删除空字符串
+# * "$@" 将保留参数原样，因此不提供参数将导致不传递参数；
+#   在大多数情况下，您希望使用它来传递参数
+# * "$*" 扩展为一个参数，所有参数（通常）由空格连接，
+#   因此不提供任何参数将导致传递一个空字符串
+# （请参考 `man bash`）
 
 (set -- 1 "2 two" "3 three tres"; echo $#; set -- "$*"; echo "$#, $@")
 (set -- 1 "2 two" "3 three tres"; echo $#; set -- "$@"; echo "$#, $@")
@@ -422,7 +426,7 @@ grep -cP '([Ss]pecial|\|?characters*)$' ${1:+"$1"}
 
 ### ShellCheck
 
-ShellCheck 项目为您的 shell 脚本识别常见的错误和警告。建议所有脚本都使用这个选项，无论大小。
+[ShellCheck 项目](https://www.shellcheck.net/)为您的 shell 脚本识别常见的错误和警告。建议所有脚本都使用这个选项，无论大小。
 
 ### 命令替换
 
@@ -433,38 +437,36 @@ ShellCheck 项目为您的 shell 脚本识别常见的错误和警告。建议�
 例如：
 
 ````bash
-# This is preferred:
+# 首选：
 var="$(command "$(command1)")"
 ````
 
 ````bash
-# This is not:
+# 而不是：
 var="`command \`command1\``"
 ````
 
-### Test, `[ ... ]` 和 `[[ ... ]]`
+### Test, [ ... ] 和 [[ ... ]]
 
 首选 `[[ ... ]]`，而不是 `[ ... ]`、`test` 和 `/usr/bin/[`。
 
 因为在 `[[` 和 `]]` 之间不会有路径名称扩展或单词分割发生，所以使用 `[[ ... ]]` 能够减少错误。而且 `[[ ... ]]` 允许正则表达式匹配，而 `[ ... ]` 不允许。
 
 `````bash
-# This ensures the string on the left is made up of characters in
-# the alnum character class followed by the string name.
-# Note that the RHS should not be quoted here.
+# 这确保左边的字符串由 alnum 字符类中的字符组成，后面跟着字符串 name
+# 注意，这里不应引用 RHS
 if [[ "filename" =~ ^[[:alnum:]]+name ]]; then
   echo "Match"
 fi
 
-# This matches the exact pattern "f*" (Does not match in this case)
+# 这匹配精确模式 "f*"（在这种情况下不匹配）
 if [[ "filename" == "f*" ]]; then
   echo "Match"
 fi
 `````
 
 ````bash
-# This gives a "too many arguments" error as f* is expanded to the
-# contents of the current directory
+# 当 f* 扩展到当前目录的内容时，会给出 "too many arguments" 错误
 if [ "filename" == f* ]; then
   echo "Match"
 fi
@@ -479,25 +481,24 @@ fi
 Bash 足以在测试中处理空字符串。因此，请使用空（非空）字符串测试，而不是填充字符，使得代码更易于阅读。
 
 ````bash
-# Do this:
+# 这样做：
 if [[ "${my_var}" == "some_string" ]]; then
   do_something
 fi
 
-# -z (string length is zero) and -n (string length is not zero) are
-# preferred over testing for an empty string
+# 进行空字符串测试时，优先使用 -z（字符串长度为零）和 -n（字符串长度不为零）
 if [[ -z "${my_var}" ]]; then
   do_something
 fi
 
-# This is OK (ensure quotes on the empty side), but not preferred:
+# 这是可以的（确保引号在空的一侧），但不是首选：
 if [[ "${my_var}" == "" ]]; then
   do_something
 fi
 ````
 
 ````bash
-# Not this:
+# 不要这样:
 if [[ "${my_var}X" == "some_stringX" ]]; then
   do_something
 fi
@@ -506,14 +507,14 @@ fi
 为避免对您测试的目的产生困惑，请明确使用 `-z` 或 `-n`。
 
 ```bash
-# Use this
+# 使用这个
 if [[ -n "${my_var}" ]]; then
   do_something
 fi
 ```
 
 ````bash
-# Instead of this
+# 而不是这个
 if [[ "${my_var}" ]]; then
   do_something
 fi
@@ -522,7 +523,7 @@ fi
 为了清晰起见，使用 `==` 来表示相等，而不是 `=`，尽管两者都可以。前者鼓励使用 `[[`，后者可能会与赋值混淆。但是，在 `[[ ... ]]` 中使用 `<` 和 `>` 时要小心，因为它执行字典序比较。使用 `(( ... ))` 或 `-lt` 和 `-gt` 进行数值比较。
 
 ````bash
-# Use this
+# 使用这个
 if [[ "${my_var}" == "val" ]]; then
   do_something
 fi
@@ -537,14 +538,14 @@ fi
 ````
 
 ````bash
-# Instead of this
+# 而不是这个
 if [[ "${my_var}" = "val" ]]; then
   do_something
 fi
 
-# Probably unintended lexicographical comparison.
+# 可能是无意的字典比较
 if [[ "${my_var}" > 3 ]]; then
-  # True for 4, false for 22.
+  # 4 为真，22 为假
   do_something
 fi
 ````
@@ -556,17 +557,17 @@ fi
 因为文件名可能以 `-` 开头，所以使用 `./*` 而不是 `*` 扩展通配符要安全得多。
 
 ````bash
-# Here's the contents of the directory:
+# 以下是该目录的内容
 # -f  -r  somedir  somefile
 
-# Incorrectly deletes almost everything in the directory by force
+# 错误地强制删除目录中的几乎所有内容
 psa@bilby$ rm -v *
 removed directory: `somedir'
 removed `somefile'
 ````
 
 ```bash
-# As opposed to:
+# 而不是：
 psa@bilby$ rm -v ./*
 removed `./-f'
 removed `./-r'
@@ -581,25 +582,24 @@ removed `./somefile'
 Eval 在用于变量赋值时会调整输入，并且能够设置变量，但无法检查这些变量是什么。
 
 ```bash
-# What does this set?
-# Did it succeed? In part or whole?
+# 这个设置了什么？
+# 成功了吗？部分还是全部？
 eval $(set_my_variables)
 
-# What happens if one of the returned values has a space in it?
+# 如果其中一个返回值中有空格会发生什么？
 variable="$(eval some_function)"
 ```
 
 ### 数组
 
-应该使用 Bash 数组来存储元素列表，以避免引用复杂性。这尤其适用于参数列表。数组不应用于促成更复杂的数据结构（请参阅上面什么时候使用 Shell）。
+应该使用 Bash 数组来存储元素列表，以避免引用复杂性。这尤其适用于参数列表。数组不应用于促成更复杂的数据结构（请参阅上面[什么时候使用 Shell](#什么时候使用-Shell)）。
 
 数组存储字符串的有序集合，可以安全地扩展为单个元素，用于命令或循环。
 
 应该避免将一个字符串用于多个命令参数，因为这不可避免地会导致作者使用 `eval` 或试图在字符串中嵌套引号，这不会给出可靠或可读的结果，并且会导致不必要的复杂性。
 
 ````bash
-# An array is assigned using parentheses, and can be appended to
-# with +=( … ).
+# 数组使用圆括号赋值，可以用 +=( ... ) 追加
 declare -a flags
 flags=(--foo --bar='baz')
 flags+=(--greeting="Hello ${name}")
@@ -607,26 +607,21 @@ mybinary "${flags[@]}"
 ````
 
 ````bash
-# Don’t use strings for sequences.
+# 不要在序列中使用字符串
 flags='--foo --bar=baz'
-flags+=' --greeting="Hello world"'  # This won’t work as intended.
+flags+=' --greeting="Hello world"'  # 这不会像预期的那样工作
 mybinary ${flags}
 ````
 
 ````bash
-# Command expansions return single strings, not arrays. Avoid
-# unquoted expansion in array assignments because it won’t
-# work correctly if the command output contains special
-# characters or whitespace.
+# 命令展开返回单个字符串，而不是数组。避免在数组赋值中使用不带引号的展开，
+# 因为如果命令输出包含特殊字符或空白，将无法正常工作。
 
-# This expands the listing output into a string, then does special keyword
-# expansion, and then whitespace splitting.  Only then is it turned into a
-# list of words.  The ls command may also change behavior based on the user's
-# active environment!
+# 这将把清单输出展开为一个字符串，然后进行特殊的关键字展开，然后分割空白。
+# 只有这样，它才会变成一个单词列表。ls 命令还可以根据用户的活动环境改变行为！
 declare -a files=($(ls /directory))
 
-# The get_arguments writes everything to STDOUT, but then goes through the
-# same expansion process above before turning into a list of arguments.
+# get_arguments 将所有内容写入 STDOUT，但在转换为参数列表之前，会经历上面相同的展开过程。
 mybinary $(get_arguments)
 ````
 
@@ -641,7 +636,7 @@ mybinary $(get_arguments)
 
 #### 数组的抉择
 
-数组应该被用于安全地创建和传递列表。特别是在构建一组命令参数时，请使用数组以避免混淆引用问题。使用带引号的扩展 - `"${array[@]}"` - 来访问数组。但是，如果需要更高级的数据操作，则应完全避免使用 shell 脚本； 看上面。
+数组应该被用于安全地创建和传递列表。特别是在构建一组命令参数时，请使用数组以避免混淆引用问题。使用带引号的扩展 - `"${array[@]}"` - 来访问数组。但是，如果需要更高级的数据操作，则应完全避免使用 shell 脚本； 看[上面](#什么时候使用-Shell)。
 
 ### 管道导向 while 循环
 
@@ -657,7 +652,7 @@ your_command | while read -r line; do
   fi
 done
 
-# This will always output 'NULL'!
+# 这将总是输出 'NULL'！
 echo "${last_line}"
 ```
 
@@ -671,7 +666,7 @@ while read line; do
   fi
 done < <(your_command)
 
-# This will output the last non-empty line from your_command
+# 这将输出 your_command 的最后一个非空行
 echo "${last_line}"
 ````
 
@@ -688,7 +683,7 @@ done
 echo "${last_line}"
 ```
 
-> 注意：请谨慎使用 for 循环来迭代输出，例如 `for var in $(...)`，因为输出是按空格分割的，而不是按行。有时你能知道这是安全的，因为输出不包含任何意外的空格，但是在这不明显或不能提高可读性的地方（例如 `$(...)` 中的长命令），`while read` 循环或 `readarray` 通常更安全、更清晰。
+> 注意：请谨慎使用 for 循环来迭代输出，例如 `for var in $(...)`，因为输出是按空格分割的，而不是按行。有时你能知道这是安全的，因为输出不包含任何意外的空格，但是在不明显或不能提高可读性的地方（例如 `$(...)` 中的长命令），`while read` 循环或 `readarray` 通常更安全、更清晰。
 
 ### 算术
 
@@ -696,39 +691,38 @@ echo "${last_line}"
 
 永远不要使用 `$[ ... ]` 语法、`expr` 命令或内置的 `let`。
 
-`<` 和 `>` 在 `[[ ... ]]` 表达式中不执行数值比较（它们执行字典序比较；请参阅字符串测试）。作为首选，根本不要使用 `[[ ... ]]` 进行数值比较，而是使用 `(( ... ))`。
+`<` 和 `>` 在 `[[ ... ]]` 表达式中不执行数值比较（它们执行字典序比较；请参阅[字符串测试](#字符串测试)）。作为首选，根本不要使用 `[[ ... ]]` 进行数值比较，而是使用 `(( ... ))`。
 
 建议避免将 `$(( ... ))` 作为独立语句使用，否则要小心其表达式的值为零。
 
 * 特别是在启用 `set -e` 的情况下。例如，执行 `set -e; i=0; (( i++ ))` 将导致 shell 退出。
 
 ```bash
-# Simple calculation used as text - note the use of $(( … )) within
-# a string.
+# 作为文本使用的简单计算 - 注意在字符串中使用 $(( ... ))。
 echo "$(( 2 + 2 )) is 4"
 
-# When performing arithmetic comparisons for testing
+# 在做算术比较测试时
 if (( a < b )); then
   ...
 fi
 
-# Some calculation assigned to a variable.
+# 赋值给变量的计算。
 (( i = 10 * j + 400 ))
 ```
 
 ```bash
-# This form is non-portable and deprecated
+# 这种形式不可移植，已弃用
 i=$[2 * 10]
 
-# Despite appearances, 'let' isn't one of the declarative keywords,
-# so unquoted assignments are subject to globbing wordsplitting.
-# For the sake of simplicity, avoid 'let' and use (( … ))
+# 尽管出现，“let”并不是声明性关键字之一，
+# 因此未加引号的赋值会受到全局分词（globbing wordsplitting）的影响。
+# 为了简单起见，避免使用 'let' 和 (( ... ))
 let i="2 + 2"
 
-# The expr utility is an external program and not a shell builtin.
+# expr 实用程序是一个外部程序，而不是 shell 内置命令。
 i=$( expr 4 + 4 )
 
-# Quoting can be error prone when using expr too.
+# 在使用 expr 时，引用也容易出错。
 i=$( expr 4 '*' 4 )
 ```
 
@@ -737,26 +731,25 @@ i=$( expr 4 '*' 4 )
 当使用变量时，在 `$(( ... ))` 中不需要 `${var}`（和 `$var`）形式。Shell 知道为您查找 `var`，省略 `${...}` 能够让代码更简洁。这与之前关于始终使用大括号的规则略有不同，因此这只是一个建议。
 
 ```bash
-# N.B.: Remember to declare your variables as integers when
-# possible, and to prefer local variables over globals.
+# 注意：记住尽可能地将变量声明为整数，并且优先选择局部变量而不是全局变量。
 local -i hundred=$(( 10 * 10 ))
 declare -i five=$(( 10 / 2 ))
 
-# Increment the variable "i" by three.
-# Note that:
-#  - We do not write ${i} or $i.
-#  - We put a space after the (( and before the )).
+# 将变量 "i" 增加 3。
+# 注意：
+#   - 我们不写 ${i} 或 $i。
+#   - 我们在 (( 之后和 )) 之前放置一个空格。
 (( i += 3 ))
 
-# To decrement the variable "i" by five:
+# 将变量 "i" 减少 5：
 (( i -= 5 ))
 
-# Do some complicated computations.
-# Note that normal arithmetic operator precedence is observed.
+# 进行一些复杂的计算。
+# 请注意，遵守正常的算术运算符优先级。
 hr=2
 min=5
 sec=30
-echo $(( hr * 3600 + min * 60 + sec )) # prints 7530 as expected
+echo $(( hr * 3600 + min * 60 + sec )) # 按预期打印 7530
 ```
 
 ## 命名约定
@@ -768,12 +761,12 @@ echo $(( hr * 3600 + min * 60 + sec )) # prints 7530 as expected
 如果您正在编写单个函数，请使用小写字母并使用下划线分隔单词。 如果您正在编写一个包，请使用 `::` 分隔包名。大括号必须和函数名称位于同一行（与 Google 的其他语言一样），并且函数名称和括号之间不能有空格。
 
 ```bash
-# Single function
+# 单个函数
 my_func() {
   ...
 }
 
-# Part of a package
+# 包的一部分
 mypackage::my_func() {
   ...
 }
@@ -798,10 +791,10 @@ done
 常量和任何导出到环境中的东西都应该大写。
 
 ```bash
-# Constant
+# 常量
 readonly PATH_TO_FILES='/some/path'
 
-# Both constant and environment
+# 常量和环境变量
 declare -xr ORACLE_SID='PROD'
 ```
 
@@ -850,7 +843,7 @@ fi
 my_func2() {
   local name="$1"
 
-  # Separate lines for declaration and assignment:
+  # 声明和赋值在不同的行：
   local my_var
   my_var="$(my_func)"
   (( $? == 0 )) || return
@@ -861,8 +854,8 @@ my_func2() {
 
 ```bash
 my_func2() {
-  # DO NOT do this:
-  # $? will always be zero, as it contains the exit code of 'local', not my_func
+  # 不要这样做：
+  # $? 将始终为 0，因为它包含 'local' 的退出码，而不是 my_func 的
   local my_var="$(my_func)"
   (( $? == 0 )) || return
 
@@ -880,9 +873,7 @@ my_func2() {
 
 对于包含至少一个其他函数的足够长的脚本，需要一个名为 `main` 的函数。
 
-为了方便找到程序的开头，把主程序放在一个叫做 main 的函数中，作为最底层的函数。这提供了与代码库其余部分的一致性，并允许您定义更多变量为局部变量（如果主代码不是函数，则无法这样做）
-
-这提供了与代码库其余部分的一致性，并允许您将更多变量定义为 `local`（如果主代码不是函数则不能这样做）。文件中最后一个非注释行应该是对 `main` 函数的调用：
+为了方便找到程序的开头，把主程序放在一个叫做 main 的函数中，作为最底层的函数。这提供了与代码库其余部分的一致性，并允许您定义更多变量为局部变量（如果主代码不是函数，则无法这样做）。文件中最后一个非注释行应该是对 `main` 函数的调用：
 
 ````bash
 main "$@"
@@ -906,7 +897,7 @@ if ! mv "${file_list[@]}" "${dest_dir}/"; then
   exit 1
 fi
 
-# Or
+# 或者
 mv "${file_list[@]}" "${dest_dir}/"
 if (( $? != 0 )); then
   echo "Unable to move ${file_list[*]} to ${dest_dir}" >&2
@@ -914,7 +905,7 @@ if (( $? != 0 )); then
 fi
 ````
 
-Bash 还有一个 `PIPESTATUS` 变量，它允许检查来自管道所有部分的返回代码。如果只需要检查整个管道是成功还是失败，则以下的方法是可以接受的:
+Bash 还有一个 `PIPESTATUS` 变量，它允许检查来自管道所有部分的返回代码。如果只需要检查整个管道是成功还是失败，则以下的方法是可以接受的：
 
 ````bash
 tar -cf - ./* | ( cd "${dir}" && tar -xf - )
@@ -945,13 +936,13 @@ fi
 例如：
 
 ````bash
-# Prefer this:
+# 更喜欢这样：
 addition=$(( X + Y ))
 substitution="${string/#foo/bar}"
 ````
 
 ````bash
-# Instead of this:
+# 而不是这样：
 addition="$(expr "${X}" + "${Y}")"
 substitution="$(echo "${string}" | sed -e 's/^foo/bar/')"
 ````
